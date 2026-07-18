@@ -1,0 +1,11 @@
+[
+  { "code": "first_learn", "title": "初学者", "description": "完成第一次学习", "icon": "🏆", "type": "first_word", "threshold": 1, "reward_stars": 5 },
+  { "code": "streak_7", "title": "7天坚持", "description": "连续学习7天", "icon": "🎖", "type": "streak", "threshold": 7, "reward_stars": 10 },
+  { "code": "learn_50", "title": "50字", "description": "学习50个汉字", "icon": "🥉", "type": "learn_count", "threshold": 50, "reward_stars": 20 },
+  { "code": "learn_100", "title": "100字", "description": "学习100个汉字", "icon": "🥈", "type": "learn_count", "threshold": 100, "reward_stars": 30 },
+  { "code": "learn_200", "title": "200字", "description": "学习200个汉字", "icon": "🥇", "type": "learn_count", "threshold": 200, "reward_stars": 50 },
+  { "code": "learn_300", "title": "300字", "description": "学习300个汉字", "icon": "🏅", "type": "learn_count", "threshold": 300, "reward_stars": 80 },
+  { "code": "learn_500", "title": "500字", "description": "学习500个汉字", "icon": "👑", "type": "learn_count", "threshold": 500, "reward_stars": 100 },
+  { "code": "perfect_quiz", "title": "满分达人", "description": "关卡测验全对", "icon": "⭐", "type": "quiz", "threshold": 10, "reward_stars": 15 },
+  { "code": "review_master", "title": "复习高手", "description": "完成100次复习", "icon": "🌟", "type": "review", "threshold": 100, "reward_stars": 25 }
+]
