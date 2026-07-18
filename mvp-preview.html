@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>识字冒险岛 · MVP 交互预览</title>
+<style>
+  :root{
+    --orange:#FF8C42; --mint:#4ECDC4; --green:#95E1A3; --yellow:#FFD93D;
+    --bg:#FFF9F0; --ink:#3D3A36; --ink-soft:#8A837A; --card:#FFFFFF;
+    --line:#F0E6D8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:#EDE4D6; color:var(--ink); display:flex; justify-content:center; padding:24px 12px;
+  }
+  .phone{
+    width:375px; background:var(--bg); border-radius:36px; overflow:hidden;
+    box-shadow:0 24px 60px rgba(0,0,0,.22); position:relative; min-height:760px;
+  }
+  .statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:14px;font-weight:600;}
+  .screen{display:none;padding:0 20px 90px;animation:fade .25s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h1{font-size:22px;margin:6px 0 2px;}
+  .sub{color:var(--ink-soft);font-size:13px;margin:0 0 16px;}
+  /* mascot */
+  .mascot{font-size:54px;text-align:center;margin:10px 0 4px;}
+  .bubble{background:var(--card);border-radius:18px;padding:14px 16px;font-size:15px;
+    box-shadow:0 6px 18px rgba(255,140,66,.12);border:1px solid var(--line);}
+  .btn{display:block;width:100%;border:none;border-radius:18px;padding:16px;font-size:17px;
+    font-weight:700;color:#fff;background:var(--orange);box-shadow:0 8px 18px rgba(255,140,66,.32);
+    cursor:pointer;margin-top:14px;}
+  .btn:active{transform:translateY(1px);}
+  .btn.ghost{background:var(--card);color:var(--orange);border:2px solid var(--orange);box-shadow:none;}
+  .unlock-card{background:linear-gradient(135deg,#FFF3E2,#FFE6CC);border-radius:20px;padding:16px;
+    margin-top:14px;display:flex;align-items:center;gap:12px;border:1px solid #FFD9B0;}
+  .unlock-card .em{font-size:34px;}
+  .unlock-card .t{font-size:15px;font-weight:700;}.unlock-card .d{font-size:12px;color:var(--ink-soft);}
+  /* tab bar */
+  .tabbar{position:absolute;bottom:0;left:0;right:0;height:64px;background:#fff;display:flex;
+    border-top:1px solid var(--line);}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-size:11px;color:var(--ink-soft);cursor:pointer;gap:3px;}
+  .tab.active{color:var(--orange);font-weight:700;}
+  .tab .ic{font-size:22px;}
+  /* map */
+  .chapter{font-size:16px;font-weight:700;margin:16px 0 10px;}
+  .levels{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  .lv{aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:15px;border:1px solid var(--line);}
+  .lv.done{background:var(--green);color:#1f5236;}
+  .lv.open{background:var(--orange);color:#fff;}
+  .lv.lock{background:#F3ECE0;color:#C9BFAE;}
+  .banner{position:absolute;bottom:70px;left:14px;right:14px;background:var(--orange);color:#fff;
+    border-radius:14px;padding:12px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;
+    box-shadow:0 8px 18px rgba(255,140,66,.35);}
+  /* card flow */
+  .stepbar{display:flex;gap:6px;margin:14px 0;}
+  .step{flex:1;height:6px;border-radius:4px;background:#EBDDCB;}
+  .step.on{background:var(--orange);}
+  .bigchar{font-size:96px;text-align:center;font-weight:800;color:var(--ink);margin:8px 0 0;}
+  .pinyin{text-align:center;color:var(--mint);font-size:20px;font-weight:700;}
+  .word{text-align:center;color:var(--ink-soft);margin-top:4px;}
+  .imgwrap{text-align:center;font-size:80px;margin:18px 0 6px;cursor:pointer;}
+  .readbtn{margin:18px auto;width:120px;height:120px;border-radius:50%;background:var(--mint);
+    color:#fff;border:none;font-size:15px;font-weight:700;display:flex;align-items:center;
+    justify-content:center;box-shadow:0 8px 20px rgba(78,205,196,.4);cursor:pointer;}
+  .readbtn:active{transform:scale(.96);}
+  .writebox{height:200px;border:3px dashed var(--orange);border-radius:18px;margin:14px 0;
+    display:flex;align-items:center;justify-content:center;font-size:64px;color:#E6B98C;background:#FFFBF5;}
+  .quiz{margin-top:14px;}
+  .opt{display:block;width:100%;text-align:left;border:2px solid var(--line);background:#fff;
+    border-radius:14px;padding:14px 16px;font-size:16px;margin-bottom:10px;cursor:pointer;color:var(--ink);}
+  .opt.ok{background:var(--green);color:#1f5236;border-color:var(--green);}
+  .step-label{text-align:center;color:var(--orange);font-weight:700;font-size:14px;margin-top:4px;}
+  /* unlock page */
+  .paycard{background:#fff;border-radius:22px;padding:26px 22px;margin-top:30px;
+    box-shadow:0 12px 30px rgba(0,0,0,.07);text-align:center;border:1px solid var(--line);}
+  .paycard .em{font-size:56px;}
+  .price{font-size:40px;font-weight:800;color:var(--orange);margin:8px 0;}
+  .paydesc{color:var(--ink-soft);font-size:13px;line-height:1.6;}
+  .note{font-size:11px;color:#B7AE9E;text-align:center;margin-top:14px;line-height:1.5;}
+  .modal{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;
+    justify-content:center;z-index:20;}
+  .modal.show{display:flex;}
+  .modal .box{background:#fff;border-radius:20px;padding:22px;width:80%;text-align:center;}
+  .modal .box .em{font-size:50px;}
+  .tag{display:inline-block;background:#FFEFE0;color:var(--orange);font-size:11px;
+    padding:3px 10px;border-radius:20px;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span>🔋 100%</span></div>
+
+  <!-- HOME -->
+  <div class="screen active" id="home">
+    <h1>识字冒险岛</h1>
+    <p class="sub">和字宝一起，在冒险里认字吧！</p>
+    <div class="mascot">🦊</div>
+    <div class="bubble">嗨，我是字宝！今天我们已经认识了 <b>12</b> 个字啦，继续加油～</div>
+    <button class="btn" onclick="go('map')">▶ 继续学习</button>
+    <div class="unlock-card" onclick="go('unlock')">
+      <div class="em">👑</div>
+      <div><div class="t">永久解锁全部 304 字</div>
+      <div class="d">一次买断 ¥68，永不自动续费</div></div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="screen" id="map">
+    <h1>冒险地图</h1>
+    <p class="sub">点亮关卡，收集汉字星星 ⭐</p>
+    <div class="chapter">第 1 章 · 数字与日常</div>
+    <div class="levels">
+      <div class="lv done">✓</div>
+      <div class="lv open" onclick="go('card')">1</div>
+      <div class="lv lock">🔒</div>
+      <div class="lv lock">🔒</div>
+      <div class="lv lock">🔒</div>
+      <div class="lv lock">🔒</div>
+    </div>
+    <div class="chapter">第 2 章 · 自然万物</div>
+    <div class="levels">
+      <div class="lv lock">🔒</div><div class="lv lock">🔒</div><div class="lv lock">🔒</div>
+      <div class="lv lock">🔒</div><div class="lv lock">🔒</div>
+    </div>
+    <div class="banner" onclick="go('unlock')">🔒 解锁全部 304 字，一次买断 ¥68</div>
+  </div>
+
+  <!-- CARD FLOW -->
+  <div class="screen" id="card">
+    <h1 style="margin-bottom:0">第 1 关</h1>
+    <div class="stepbar">
+      <div class="step on"></div><div class="step"></div><div class="step"></div>
+      <div class="step"></div><div class="step"></div>
+    </div>
+    <div class="step-label" id="stepLabel">第一步 · 认一认</div>
+    <div id="cardBody"></div>
+    <button class="btn" id="nextBtn" onclick="nextStep()">下一步 ▶</button>
+  </div>
+
+  <!-- UNLOCK -->
+  <div class="screen" id="unlock">
+    <h1>永久解锁</h1>
+    <p class="sub">买断后即可畅学全部内容</p>
+    <div class="paycard">
+      <div class="em">👑</div>
+      <div class="price">¥68</div>
+      <div class="paydesc">304 个常用字 + 全部关卡 + 智能复习报告，<br>永久免费更新，<b>绝无自动续费</b>。</div>
+      <button class="btn" style="margin-top:18px" onclick="demoUnlock()">立即解锁 ¥68</button>
+      <button class="btn ghost" onclick="go('home')">再想想</button>
+      <div class="note">提示：个人主体小程序暂不支持微信支付，<br>此演示版点「立即解锁」即可体验全部内容。</div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <div class="tab active" onclick="go('home')"><div class="ic">🏠</div>首页</div>
+    <div class="tab" onclick="go('map')"><div class="ic">🗺️</div>地图</div>
+    <div class="tab" onclick="alert('报告页（演示略）')"><div class="ic">📊</div>报告</div>
+    <div class="tab" onclick="alert('我的 / 家长中心（演示略）')"><div class="ic">👤</div>我的</div>
+  </div>
+
+  <!-- ZOOM MODAL -->
+  <div class="modal" id="zoomModal">
+    <div class="box"><div style="font-size:80px">🌳</div>
+      <div style="margin-top:10px;color:var(--ink-soft);font-size:13px">大树 · 象形联想</div>
+      <button class="btn ghost" onclick="closeZoom()">收起</button></div>
+  </div>
+  <!-- UNLOCK TOAST -->
+  <div class="modal" id="okModal">
+    <div class="box"><div style="font-size:54px">🎉</div>
+      <div style="margin-top:8px;font-weight:700">已解锁全部内容！</div>
+      <button class="btn" onclick="closeOk()">好的</button></div>
+  </div>
+</div>
+
+<script>
+  const screens=['home','map','card','unlock'];
+  function go(id){
+    screens.forEach(s=>document.getElementById(s).classList.toggle('active',s===id));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    const map={home:0,map:1};
+    if(map[id]!==undefined) document.querySelectorAll('.tab')[map[id]].classList.add('active');
+    if(id==='card') resetCard();
+  }
+  // card flow
+  const steps=[
+    {label:'第一步 · 认一认', html:'<div class="bigchar">木</div><div class="pinyin">mù</div><div class="word">例词：树木 / 木头</div>'},
+    {label:'第二步 · 看一看', html:'<div class="imgwrap" onclick="openZoom()">🌳</div><div class="word">点一点图片可以放大看</div>'},
+    {label:'第三步 · 听一听，读一读', html:'<button class="readbtn" onclick="readAnim(this)">🎤<br>跟读</button><div class="word">按住录音，松手听回放（演示）</div>'},
+    {label:'第四步 · 写一写', html:'<div class="writebox">木</div><div class="word">沿着虚线描摹笔画顺序</div>'},
+    {label:'第五步 · 测一测', html:'<div class="quiz"><div class="word" style="margin-bottom:8px">「木」的读音是？</div><button class="opt" onclick="quizOk(this)">mù</button><button class="opt" onclick="quizNo(this)">shuǐ</button><button class="opt" onclick="quizNo(this)">huǒ</button></div>'}
+  ];
+  let cur=0;
+  function resetCard(){cur=0;renderStep();}
+  function renderStep(){
+    document.getElementById('stepLabel').textContent=steps[cur].label;
+    document.getElementById('cardBody').innerHTML=steps[cur].html;
+    document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('on',i<=cur));
+    document.getElementById('nextBtn').textContent = cur<steps.length-1 ? '下一步 ▶' : '完成关卡 🎉';
+  }
+  function nextStep(){
+    if(cur<steps.length-1){cur++;renderStep();}
+    else{ alert('🎉 第 1 关完成！已记入学习进度'); go('map'); }
+  }
+  function openZoom(){document.getElementById('zoomModal').classList.add('show');}
+  function closeZoom(){document.getElementById('zoomModal').classList.remove('show');}
+  function readAnim(b){b.textContent='录音中…';setTimeout(()=>{b.textContent='🔊 回放';},1500);
+    setTimeout(()=>{b.innerHTML='🎤<br>跟读';},3200);}
+  function quizOk(b){b.classList.add('ok');setTimeout(()=>{alert('✅ 答对啦！');nextStep();},500);}
+  function quizNo(b){b.style.background='#FFD9D9';b.style.borderColor='#E88';setTimeout(()=>{b.style.background='';b.style.borderColor='';},600);}
+  function demoUnlock(){document.getElementById('okModal').classList.add('show');}
+  function closeOk(){document.getElementById('okModal').classList.remove('show');go('home');}
+</script>
+</body>
+</html>
