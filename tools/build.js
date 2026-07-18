@@ -1,0 +1,13 @@
+const fs = require('fs');
+const path = require('path');
+const root = path.resolve(__dirname, '..');
+const dict = JSON.parse(fs.readFileSync(path.join(root, 'data/dict.json'), 'utf8'));
+const appjs = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+let tpl = fs.readFileSync(path.join(root, 'template.html'), 'utf8');
+tpl = tpl.replace('__DICT__', JSON.stringify(dict));
+tpl = tpl.replace('__APP_JS__', appjs);
+const out = path.join(root, '识字游戏.html');
+fs.writeFileSync(out, tpl);
+console.log('built:', out);
+console.log('size:', (fs.statSync(out).size / 1024).toFixed(1), 'KB');
+console.log('dict chars:', Object.keys(dict).length);
